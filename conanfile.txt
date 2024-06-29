@@ -1,0 +1,10 @@
+[requires]
+glfw/3.4
+glew/2.2.0
+
+[layout]
+cmake_layout
+
+[generators]
+CMakeDeps
+CMakeToolchain
