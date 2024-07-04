@@ -14,12 +14,20 @@ typedef struct GlrError
   const GLubyte *message;
 } GlrError;
 
+typedef struct GlrSetupArgs
+{
+  int windowWidth;
+  int windowHeight;
+  const char *windowTitle;
+} GlrSetupArgs;
+
 /**
  * @brief Setup the OpenGL context and returns the window.
+ * @param args The output param to receive the error on failure.
  * @param error The output param to receive the error on failure.
  * @return The window on success or NULL on failure.
  */
-GLFWwindow *glrSetup(GlrError *error);
+GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *error);
 
 /**
  * @brief Teardown the window and the OpenGL context.

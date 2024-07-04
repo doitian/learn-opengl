@@ -1,8 +1,17 @@
 #include "glr_internal.h"
 
-GLFWwindow *glrSetup(GlrError *error)
+GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *error)
 {
+  static GlrSetupArgs DEFAULT_ARGS = {
+      .windowWidth = 640,
+      .windowHeight = 480,
+      .windowTitle = "GLR"};
   GLFWwindow *window = NULL;
+
+  if (args == NULL)
+  {
+    args = &DEFAULT_ARGS;
+  }
 
   /* Initialize the library */
   if (!glfwInit())
@@ -16,7 +25,11 @@ GLFWwindow *glrSetup(GlrError *error)
   // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
   /* Create a windowed mode window and its OpenGL context */
-  window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+  window = glfwCreateWindow(
+      args->windowWidth,
+      args->windowHeight,
+      args->windowTitle,
+      NULL, NULL);
   if (!window)
   {
     glfwTerminate();

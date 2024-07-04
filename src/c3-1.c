@@ -3,8 +3,9 @@
 
 int main(void)
 {
+  GlrSetupArgs setup = {.windowWidth = 640, .windowHeight = 480, .windowTitle = "Ex 3-1"};
   GlrError error;
-  GLFWwindow *window = glrSetup(&error);
+  GLFWwindow *window = glrSetup(&setup, &error);
 
   if (!window)
   {
