@@ -3,22 +3,22 @@
 
 #include "glr.h"
 
-void glrGetGlfwError(GlrError *error)
+void glrGetGlfwError(GlrError *outError)
 {
-  if (error != NULL)
+  if (outError != NULL)
   {
-    error->glError = GL_NO_ERROR;
-    error->glfwError = glfwGetError(&error->message);
+    outError->glError = GL_NO_ERROR;
+    outError->glfwError = glfwGetError(&outError->message);
   }
 }
 
-void glrSetGlError(GlrError *error, GLenum glError)
+void glrSetGlError(GlrError *outError, GLenum glError)
 {
-  if (error != NULL)
+  if (outError != NULL)
   {
-    error->glfwError = GLFW_NO_ERROR;
-    error->glError = glError;
-    error->message = glError != GL_NO_ERROR ? glewGetErrorString(glError) : NULL;
+    outError->glfwError = GLFW_NO_ERROR;
+    outError->glError = glError;
+    outError->message = glError != GL_NO_ERROR ? glewGetErrorString(glError) : NULL;
   }
 }
 

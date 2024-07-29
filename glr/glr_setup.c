@@ -1,6 +1,6 @@
 #include "glr_internal.h"
 
-GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *error)
+GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *outError)
 {
   static GlrSetupArgs DEFAULT_ARGS = {
       .windowWidth = 640,
@@ -16,7 +16,7 @@ GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *error)
   /* Initialize the library */
   if (!glfwInit())
   {
-    glrGetGlfwError(error);
+    glrGetGlfwError(outError);
     return window;
   }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -33,7 +33,7 @@ GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *error)
   if (!window)
   {
     glfwTerminate();
-    glrGetGlfwError(error);
+    glrGetGlfwError(outError);
     return window;
   }
 
@@ -44,7 +44,7 @@ GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *error)
   GLenum err = glewInit();
   if (GLEW_OK != err)
   {
-    glrSetGlError(error, err);
+    glrSetGlError(outError, err);
     glfwTerminate();
     window = NULL;
   }

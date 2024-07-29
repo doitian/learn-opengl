@@ -4,7 +4,13 @@ project(learn-opengl C)
 find_package(glfw3 REQUIRED)
 find_package(glew REQUIRED)
 
-add_library(glr glr/glr_setup.c glr/glr_teardown.c)
+add_library(glr
+  glr/glr_setup.c
+  glr/glr_teardown.c
+  glr/glr_file.c
+  glr/glr_shader.c
+)
+
 target_include_directories(glr PUBLIC glr)
 target_link_libraries(glr PUBLIC glfw GLEW::GLEW)
 
