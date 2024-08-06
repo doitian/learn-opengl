@@ -56,3 +56,10 @@ copy_shaders(c5-3
   shaders/c5-1.frag
   shaders/c5-3.frag
 )
+
+add_executable(c6-1 src/c6-1.c)
+target_link_libraries(c6-1 glr)
+copy_shaders(c6-1
+  shaders/c6-1.vert
+  shaders/c6-1.frag
+)
