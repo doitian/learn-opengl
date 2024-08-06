@@ -51,28 +51,40 @@ void glrTeardown(GLFWwindow *window);
 const char *glrReadFile(const char *filename, const char *mode, long *outLen);
 
 /**
- * @brief Create a shader by compiling the source code.
+ * @brief Load a shader by compiling the source code.
  *
- * Parameters `count` and `string` are the same as `glShaderSource`.
- *
- * @return The shader object or 0 on error.
+ * @param string The source code content.
+ * @param length The length of the source code.
+ * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-GLuint glrShaderSource(GLenum shaderType, GLsizei count, const GLchar **string, const GLint *length);
+const GLchar* glrShaderSource(GLuint shader, const GLchar *string, GLsizei length);
 
 /**
- * @brief Create a shader by loading the binary.
- *
- * Parameters are the same as `glShaderBInary`.
- *
- * @return The shader object or 0 on error.
+ * @brief Load a shader by compiling the source code from the file.
+ * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-GLuint glrShaderBinary(GLenum shaderType, GLenum binaryFormat, const void *binary, GLsizei length, const GLchar *entryPoint);
+const GLchar* glrShaderSourceFromFile(GLuint shader, const char *filename);
 
 /**
- * @brief Get the shader source compilation or binary specialization error.
+ * @brief Load a shader from the pre-compiled binary.
+ *
+ * Parameters are the same as `glShaderBinary`.
  *
  * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-const GLchar *glrGetShaderError(GLuint shader);
+const GLchar* glrShaderBinary(GLuint shader, GLenum binaryFormat, const void *binary, GLsizei length, const GLchar *entryPoint);
+
+/**
+ * @brief Load a shader from the pre-compiled binary file.
+ * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
+ */
+const GLchar* glrShaderBinaryFromFile(GLuint shader, GLenum binaryFormat, const char *filename, const GLchar *entryPoint);
+
+/**
+ * @brief Link the program.
+ *
+ * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
+ */
+const GLchar *glrLinkProgram(GLuint program);
 
 #endif // __GLR_H__
