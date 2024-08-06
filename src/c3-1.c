@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <glr.h>
 
-int main(void)
+int main(int argc, char* argv[])
 {
-  GlrSetupArgs setup = {.windowWidth = 640, .windowHeight = 480, .windowTitle = "Ex 3-1"};
+  GlrSetupArgs setup = {.windowWidth = 640, .windowHeight = 480, .windowTitle = argv[0]};
   GlrError error;
   GLFWwindow *window = glrSetup(&setup, &error);
 
