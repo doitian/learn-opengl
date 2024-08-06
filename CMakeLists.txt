@@ -70,3 +70,10 @@ copy_shaders(c6-2
   shaders/c6-2.vert
   shaders/c6-2.frag
 )
+
+add_executable(c6-3 src/c6-3.c)
+target_link_libraries(c6-3 glr)
+copy_shaders(c6-3
+  shaders/c6-3.vert
+  shaders/c6-3.frag
+)
