@@ -36,10 +36,6 @@ int main(int argc, char* argv[])
     glDeleteShader(fragShader);
   }
 
-  GLint xOffsetLocation = glGetUniformLocation(program, "xOffset");
-  glUseProgram(program);
-  glUniform1f(xOffsetLocation, 0.5f);
-
   static float vertices[] = {
       -0.5f, -0.5f, 0.0f, // left
       0.5f, -0.5f, 0.0f,  // right
