@@ -88,3 +88,12 @@ add_assets(c7-1
   textures/container.jpg
   textures/awesomeface.png
 )
+
+add_executable(c7-2 src/c7-2.c)
+target_link_libraries(c7-2 glr stb::stb)
+add_assets(c7-2
+  shaders/c7-1.vert
+  shaders/c7-1.frag
+  textures/container.jpg
+  textures/awesomeface.png
+)
