@@ -124,3 +124,11 @@ add_assets(c8-1
   shaders/c8-1.frag
   textures/container.jpg
 )
+
+add_executable(c8-2 src/c8-2.c)
+target_link_libraries(c8-2 glr stb::stb cglm::cglm)
+add_assets(c8-2
+  shaders/c8-1.vert
+  shaders/c8-1.frag
+  textures/container.jpg
+)
