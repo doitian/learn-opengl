@@ -2,6 +2,7 @@
 glfw/3.4
 glew/2.2.0
 stb/cci.20240531
+cglm/0.9.1
 
 [layout]
 cmake_layout
