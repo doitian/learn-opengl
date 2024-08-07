@@ -6,6 +6,7 @@ static void ensureNoErrorMessage(const GLchar *prompt, const GLchar *message)
   if (message)
   {
     fprintf(stderr, "%s: %s\n", prompt, message);
+    free(message);
     exit(-1);
   }
 }
