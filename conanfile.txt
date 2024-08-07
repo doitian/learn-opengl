@@ -1,6 +1,7 @@
 [requires]
 glfw/3.4
 glew/2.2.0
+stb/cci.20240531
 
 [layout]
 cmake_layout

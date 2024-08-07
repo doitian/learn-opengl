@@ -3,6 +3,7 @@ project(learn-opengl C)
 
 find_package(glfw3 REQUIRED)
 find_package(glew REQUIRED)
+find_package(stb REQUIRED)
 
 add_library(glr
   glr/glr_setup.c
@@ -77,4 +78,13 @@ target_link_libraries(c6-3 glr)
 add_assets(c6-3
   shaders/c6-3.vert
   shaders/c6-3.frag
+)
+
+add_executable(c7-1 src/c7-1.c)
+target_link_libraries(c7-1 glr stb::stb)
+add_assets(c7-1
+  shaders/c7-1.vert
+  shaders/c7-1.frag
+  textures/container.jpg
+  textures/awesomeface.png
 )
