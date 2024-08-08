@@ -123,6 +123,7 @@ add_assets(c8-1
   shaders/c8-1.vert
   shaders/c8-1.frag
   textures/container.jpg
+  textures/awesomeface.png
 )
 
 add_executable(c8-2 src/c8-2.c)
@@ -131,4 +132,14 @@ add_assets(c8-2
   shaders/c8-1.vert
   shaders/c8-1.frag
   textures/container.jpg
+  textures/awesomeface.png
+)
+
+add_executable(c9-3 src/c9-3.c)
+target_link_libraries(c9-3 glr stb::stb cglm::cglm)
+add_assets(c9-3
+  shaders/c9-3.vert
+  shaders/c9-3.frag
+  textures/container.jpg
+  textures/awesomeface.png
 )
