@@ -143,3 +143,12 @@ add_assets(c9-3
   textures/container.jpg
   textures/awesomeface.png
 )
+
+add_executable(c10-1 src/c10-1.c)
+target_link_libraries(c10-1 glr stb::stb cglm::cglm)
+add_assets(c10-1
+  shaders/c10-1.vert
+  shaders/c10-1.frag
+  textures/container.jpg
+  textures/awesomeface.png
+)
