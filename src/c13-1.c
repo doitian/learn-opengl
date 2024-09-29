@@ -48,8 +48,8 @@ void processInput(GLFWwindow *window, float deltaTime, Camera *camera)
 
   vec3 translation = {0.0f, 0.0f, 0.0f};
 
-  // Restrict to xz plane
-  vec3 front = {camera->front[0], 0.0f, camera->front[2]};
+  vec3 front;
+  glm_vec3_copy(camera->front, front);
   glm_vec3_normalize(front);
   vec3 right;
   glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
