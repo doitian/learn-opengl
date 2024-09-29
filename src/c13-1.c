@@ -48,19 +48,34 @@ void processInput(GLFWwindow *window, float deltaTime, Camera *camera)
 
   vec3 translation = {0.0f, 0.0f, 0.0f};
 
-  vec3 front;
+  vec3 front, up, right;
   glm_vec3_copy(camera->front, front);
   glm_vec3_normalize(front);
-  vec3 right;
+  glm_vec3_copy(camera->up, up);
+  glm_vec3_normalize(up);
   glm_vec3_cross(front, (vec3){0.0f, 1.0f, 0.0f}, right);
 
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
   {
-    glm_vec3_scale(front, cameraSpeed, translation);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+      glm_vec3_scale(up, cameraSpeed, translation);
+    }
+    else
+    {
+      glm_vec3_scale(front, cameraSpeed, translation);
+    }
   }
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
   {
-    glm_vec3_scale(front, -cameraSpeed, translation);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+    {
+      glm_vec3_scale(up, -cameraSpeed, translation);
+    }
+    else
+    {
+      glm_vec3_scale(front, -cameraSpeed, translation);
+    }
   }
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
   {
@@ -156,120 +171,49 @@ int main(int argc, char *argv[])
   glUniform3f(glGetUniformLocation(objectProgram, "lightColor"), 1.0f, 1.0f, 1.0f);
 
   static float vertices[] = {
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      //
-      -0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
+      // positions,      | normals
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+      0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+      0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+      0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+      -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f,
 
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
+      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+      0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+      0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+      0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+      -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
+      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f,
 
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
+      -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+      -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
+      -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f,
 
-      -0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-      -0.5f,
-      -0.5f,
+      0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+      0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,
+      0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
+      0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f,
 
-      -0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      0.5f,
-      -0.5f,
-      0.5f,
-      -0.5f,
-  };
+      -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+      0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+      0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+      0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,
+
+      -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+      0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,
+      0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+      0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+      -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f,
+      -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f};
+
   GLuint VBO, VAOs[2];
   glGenBuffers(1, &VBO);
   glGenVertexArrays(2, VAOs);
@@ -279,13 +223,15 @@ int main(int argc, char *argv[])
 
   glBindVertexArray(VAOs[LIGHT_ID]);
   // position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
 
   glBindVertexArray(VAOs[OBJECT_ID]);
   // position
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)0);
   glEnableVertexAttribArray(0);
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void *)(sizeof(float) * 3));
+  glEnableVertexAttribArray(1);
 
   // unbind
   glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -319,6 +265,10 @@ int main(int argc, char *argv[])
       glGetUniformLocation(lightProgram, "projection"),
       glGetUniformLocation(objectProgram, "projection")};
 
+  GLuint transposedInverseModelLocation = glGetUniformLocation(objectProgram, "transposedInverseModel");
+  GLuint lightPosLocation = glGetUniformLocation(objectProgram, "lightPos");
+  GLuint viewPosLocation = glGetUniformLocation(objectProgram, "viewPos");
+
   float lastFrame = glfwGetTime();
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window))
@@ -345,6 +295,17 @@ int main(int argc, char *argv[])
     glUniformMatrix4fv(modelLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)cubeModel);
     glUniformMatrix4fv(viewLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)view);
     glUniformMatrix4fv(projectionLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)projection);
+
+    glUniform3fv(lightPosLocation, 1, (GLfloat *)(state.lightPos));
+    glUniform3fv(viewPosLocation, 1, (GLfloat *)(state.camera.position));
+
+    mat4 transposedInverseModel;
+    glm_mat4_inv(cubeModel, transposedInverseModel);
+    glm_mat4_transpose(transposedInverseModel);
+    mat3 transposedInverseModel3;
+    glm_mat4_pick3(transposedInverseModel, transposedInverseModel3);
+    glUniformMatrix3fv(transposedInverseModelLocation, 1, GL_FALSE, (GLfloat *)transposedInverseModel3);
+
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     glUseProgram(lightProgram);
