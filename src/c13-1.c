@@ -282,6 +282,9 @@ int main(int argc, char *argv[])
     lastFrame = currentFrame;
     processInput(window, deltaTime, &state.camera);
 
+    // Rotate the light
+    glm_vec3_rotate(state.lightPos, deltaTime * 0.8f, (vec3){0.0f, 1.0f, 0.0f});
+
     vec3 cameraTarget;
     glm_vec3_add(state.camera.position, state.camera.front, cameraTarget);
     glm_lookat(state.camera.position, cameraTarget, state.camera.up, view);
