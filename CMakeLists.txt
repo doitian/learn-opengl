@@ -170,3 +170,12 @@ add_assets(c13-2
   shaders/c13-2.object.frag
   textures/container.jpg
 )
+
+add_executable(c13-3 src/c13-3.c)
+target_link_libraries(c13-3 glr stb::stb cglm::cglm)
+add_assets(c13-3
+  shaders/c13-3.vert
+  shaders/c13-1.light.frag
+  shaders/c13-3.object.frag
+  textures/container.jpg
+)
