@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
   const int LIGHT_ID = 0, OBJECT_ID = 1;
 
   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  ensureNoErrorMessage("Compiling Vertex Shader", glrShaderSourceFromFile(vertexShader, "shaders/c13-1.vert"));
+  ensureNoErrorMessage("Compiling Vertex Shader", glrShaderSourceFromFile(vertexShader, "shaders/c13-2.vert"));
 
   GLuint lightProgram = glCreateProgram();
   {
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
   GLuint objectProgram = glCreateProgram();
   {
     GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    ensureNoErrorMessage("Compiling Frag Shader", glrShaderSourceFromFile(fragShader, "shaders/c13-1.object.frag"));
+    ensureNoErrorMessage("Compiling Frag Shader", glrShaderSourceFromFile(fragShader, "shaders/c13-2.object.frag"));
     glAttachShader(objectProgram, vertexShader);
     glAttachShader(objectProgram, fragShader);
     ensureNoErrorMessage("Linking Program", glrLinkProgram(objectProgram));
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
       glGetUniformLocation(lightProgram, "projection"),
       glGetUniformLocation(objectProgram, "projection")};
 
-  GLuint transposedInverseModelLocation = glGetUniformLocation(objectProgram, "transposedInverseModel");
+  GLuint transposedInverseModelViewLocation = glGetUniformLocation(objectProgram, "transposedInverseModelView");
   GLuint lightPosLocation = glGetUniformLocation(objectProgram, "lightPos");
   GLuint viewPosLocation = glGetUniformLocation(objectProgram, "viewPos");
 
@@ -299,15 +299,18 @@ int main(int argc, char *argv[])
     glUniformMatrix4fv(viewLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)view);
     glUniformMatrix4fv(projectionLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)projection);
 
-    glUniform3fv(lightPosLocation, 1, (GLfloat *)(state.lightPos));
-    glUniform3fv(viewPosLocation, 1, (GLfloat *)(state.camera.position));
+    vec4 lightPos;
+    glm_vec4(state.lightPos, 1.0f, lightPos);
+    glm_mat4_mulv(view, lightPos, lightPos);
+    glUniform3fv(lightPosLocation, 1, (GLfloat *)(lightPos));
 
-    mat4 transposedInverseModel;
-    glm_mat4_inv(cubeModel, transposedInverseModel);
-    glm_mat4_transpose(transposedInverseModel);
-    mat3 transposedInverseModelMat3;
-    glm_mat4_pick3(transposedInverseModel, transposedInverseModelMat3);
-    glUniformMatrix3fv(transposedInverseModelLocation, 1, GL_FALSE, (GLfloat *)transposedInverseModelMat3);
+    mat4 modelViewMat, transposedInverseModelView;
+    glm_mat4_mul(view, cubeModel, modelViewMat);
+    glm_mat4_inv(modelViewMat, transposedInverseModelView);
+    glm_mat4_transpose(transposedInverseModelView);
+    mat3 transposedInverseModelViewMat3;
+    glm_mat4_pick3(transposedInverseModelView, transposedInverseModelViewMat3);
+    glUniformMatrix3fv(transposedInverseModelViewLocation, 1, GL_FALSE, (GLfloat *)transposedInverseModelViewMat3);
 
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
