@@ -140,7 +140,6 @@ int main(int argc, char *argv[])
   }
 
   const int LIGHT_ID = 0, OBJECT_ID = 1;
-  vec3 lightColor = {1.0f, 0.5f, 0.5f};
 
   GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
   ensureNoErrorMessage("Compiling Vertex Shader", glrShaderSourceFromFile(vertexShader, "shaders/c14-1.vert"));
@@ -155,9 +154,6 @@ int main(int argc, char *argv[])
     glDeleteShader(fragShader);
   }
 
-  glUseProgram(lightProgram);
-  glUniform3fv(glGetUniformLocation(lightProgram, "lightColor"), 1, lightColor);
-
   GLuint objectProgram = glCreateProgram();
   {
     GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
@@ -171,9 +167,8 @@ int main(int argc, char *argv[])
   glDeleteShader(vertexShader);
 
   glUseProgram(objectProgram);
-  glUniform3fv(glGetUniformLocation(objectProgram, "lightColor"), 1, lightColor);
   glUniform3f(glGetUniformLocation(objectProgram, "material.ambient"), 0.24725f, 0.1995f, 0.0745f);
-  glUniform3f(glGetUniformLocation(objectProgram, "material.diffuse"), 0.75164f, 	0.60648f, 0.22648f);
+  glUniform3f(glGetUniformLocation(objectProgram, "material.diffuse"), 0.75164f, 0.60648f, 0.22648f);
   glUniform3f(glGetUniformLocation(objectProgram, "material.specular"), 0.628281f, 0.555802f, 0.366065f);
   glUniform1f(glGetUniformLocation(objectProgram, "material.shininess"), 51.2f);
 
@@ -273,7 +268,7 @@ int main(int argc, char *argv[])
       glGetUniformLocation(objectProgram, "projection")};
 
   GLuint transposedInverseModelLocation = glGetUniformLocation(objectProgram, "transposedInverseModel");
-  GLuint lightPosLocation = glGetUniformLocation(objectProgram, "lightPos");
+  GLuint lightPosLocation = glGetUniformLocation(objectProgram, "light.position");
   GLuint viewPosLocation = glGetUniformLocation(objectProgram, "viewPos");
 
   float lastFrame = glfwGetTime();
@@ -288,6 +283,12 @@ int main(int argc, char *argv[])
     float deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
     processInput(window, deltaTime, &state.camera);
+
+    vec3 lightColor = {sin(lastFrame * 2.0f), sin(lastFrame * 0.7f), sin(lastFrame * 1.3f)};
+    vec3 lightSpecular = {1.0f, 1.0f, 1.0f};
+    vec3 lightAmbient, lightDiffuse;
+    glm_vec3_scale(lightColor, 0.8f, lightAmbient);
+    glm_vec3_scale(lightColor, 0.2f, lightDiffuse);
 
     // Rotate the light
     glm_vec3_rotate(state.lightPos, deltaTime * 0.8f, (vec3){0.0f, 1.0f, 0.0f});
@@ -306,6 +307,9 @@ int main(int argc, char *argv[])
     glUniformMatrix4fv(viewLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)view);
     glUniformMatrix4fv(projectionLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)projection);
 
+    glUniform3fv(glGetUniformLocation(objectProgram, "light.ambient"), 1, lightAmbient);
+    glUniform3fv(glGetUniformLocation(objectProgram, "light.diffuse"), 1, lightDiffuse);
+    glUniform3fv(glGetUniformLocation(objectProgram, "light.specular"), 1, lightSpecular);
     glUniform3fv(lightPosLocation, 1, (GLfloat *)(state.lightPos));
     glUniform3fv(viewPosLocation, 1, (GLfloat *)(state.camera.position));
 
@@ -327,6 +331,9 @@ int main(int argc, char *argv[])
     glUniformMatrix4fv(modelLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)lightModel);
     glUniformMatrix4fv(viewLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)view);
     glUniformMatrix4fv(projectionLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)projection);
+
+    glUniform3fv(glGetUniformLocation(lightProgram, "lightColor"), 1, lightColor);
+
     glDrawArrays(GL_TRIANGLES, 0, 36);
 
     /* Swap front and back buffers */
