@@ -154,7 +154,7 @@ add_assets(c10-1
 )
 
 add_executable(c13-1 src/c13-1.c)
-target_link_libraries(c13-1 glr stb::stb cglm::cglm)
+target_link_libraries(c13-1 glr cglm::cglm)
 add_assets(c13-1
   shaders/c13-1.vert
   shaders/c13-1.light.frag
@@ -162,7 +162,7 @@ add_assets(c13-1
 )
 
 add_executable(c13-2 src/c13-2.c)
-target_link_libraries(c13-2 glr stb::stb cglm::cglm)
+target_link_libraries(c13-2 glr cglm::cglm)
 add_assets(c13-2
   shaders/c13-2.vert
   shaders/c13-1.light.frag
@@ -170,7 +170,7 @@ add_assets(c13-2
 )
 
 add_executable(c13-3 src/c13-3.c)
-target_link_libraries(c13-3 glr stb::stb cglm::cglm)
+target_link_libraries(c13-3 glr cglm::cglm)
 add_assets(c13-3
   shaders/c13-3.vert
   shaders/c13-1.light.frag
@@ -178,7 +178,7 @@ add_assets(c13-3
 )
 
 add_executable(c14-1 src/c14-1.c)
-target_link_libraries(c14-1 glr stb::stb cglm::cglm)
+target_link_libraries(c14-1 glr cglm::cglm)
 add_assets(c14-1
   shaders/c14-1.vert
   shaders/c14-1.light.frag

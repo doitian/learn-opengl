@@ -5,9 +5,6 @@
 #include <cglm/cam.h>
 #include <cglm/util.h>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
-
 typedef struct Camera
 {
   vec3 position;
@@ -29,17 +26,6 @@ static void ensureNoErrorMessage(const GLchar *prompt, const GLchar *message)
     free((void *)message);
     exit(-1);
   }
-}
-
-static unsigned char *ensureStbiSuccess(unsigned char *data)
-{
-  if (data)
-  {
-    return data;
-  }
-
-  fprintf(stderr, "Failed to load image: %s\n", stbi_failure_reason());
-  exit(-1);
 }
 
 void processInput(GLFWwindow *window, float deltaTime, Camera *camera)
