@@ -273,8 +273,8 @@ int main(int argc, char *argv[])
     vec3 lightColor = {sin(lastFrame * 2.0f), sin(lastFrame * 0.7f), sin(lastFrame * 1.3f)};
     vec3 lightSpecular = {1.0f, 1.0f, 1.0f};
     vec3 lightAmbient, lightDiffuse;
-    glm_vec3_scale(lightColor, 0.5f, lightAmbient);
-    glm_vec3_scale(lightColor, 0.2f, lightDiffuse);
+    glm_vec3_scale(lightColor, 0.5f, lightDiffuse);
+    glm_vec3_scale(lightDiffuse, 0.2f, lightAmbient);
 
     // Rotate the light
     glm_vec3_rotate(state.lightPos, deltaTime * 0.8f, (vec3){0.0f, 1.0f, 0.0f});
