@@ -34,11 +34,25 @@ typedef struct PointLight
   float linear;
   float quadratic;
 } PointLight;
+typedef struct SpotLight
+{
+  vec3 position;
+  vec3 direction;
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+  float constant;
+  float linear;
+  float quadratic;
+  float cutOff;
+  float outerCutOff;
+} SpotLight;
 typedef struct State
 {
   Camera camera;
   DirLight dirLight;
   PointLight pointLights[POINT_LIGHTS_COUNT];
+  SpotLight spotLight;
 } State;
 
 typedef struct DirLightLocation
@@ -58,6 +72,19 @@ typedef struct PointLightLocation
   GLint linear;
   GLint quadratic;
 } PointLightLocation;
+typedef struct SpotLightLocation
+{
+  GLint position;
+  GLint direction;
+  GLint ambient;
+  GLint diffuse;
+  GLint specular;
+  GLint constant;
+  GLint linear;
+  GLint quadratic;
+  GLint cutOff;
+  GLint outerCutOff;
+} SpotLightLocation;
 
 static void ensureNoErrorMessage(const GLchar *prompt, const GLchar *message)
 {
@@ -342,7 +369,9 @@ int main(int argc, char *argv[])
                       // point light 3
                       {.position = {-4.0f, 2.0f, -12.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
                       // point light 4
-                      {.position = {0.0f, 0.0f, -3.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f}}};
+                      {.position = {0.0f, 0.0f, -3.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f}},
+      .spotLight = {.position = {-0.1f, 0.0f, 5.0f}, .direction = {0.0f, 0.0f, -1.0f}, .ambient = {0.0f, 0.0f, 0.0f}, .diffuse = {1.0f, 1.0f, 1.0f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f, .cutOff = cos(glm_rad(12.5f)), .outerCutOff = cos(glm_rad(17.5f))}};
+
   glfwSetWindowUserPointer(window, &state);
 
   glEnable(GL_DEPTH_TEST);
@@ -390,6 +419,17 @@ int main(int argc, char *argv[])
     snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].quadratic", i);
     pointLightsLocations[i].quadratic = glGetUniformLocation(objectProgram, uniformNameBuffer);
   }
+  SpotLightLocation spotLightLocation = {
+      .position = glGetUniformLocation(objectProgram, "spotLight.position"),
+      .direction = glGetUniformLocation(objectProgram, "spotLight.direction"),
+      .ambient = glGetUniformLocation(objectProgram, "spotLight.ambient"),
+      .diffuse = glGetUniformLocation(objectProgram, "spotLight.diffuse"),
+      .specular = glGetUniformLocation(objectProgram, "spotLight.specular"),
+      .constant = glGetUniformLocation(objectProgram, "spotLight.constant"),
+      .linear = glGetUniformLocation(objectProgram, "spotLight.linear"),
+      .quadratic = glGetUniformLocation(objectProgram, "spotLight.quadratic"),
+      .cutOff = glGetUniformLocation(objectProgram, "spotLight.cutOff"),
+      .outerCutOff = glGetUniformLocation(objectProgram, "spotLight.outerCutOff")};
 
   float lastFrame = glfwGetTime();
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -404,6 +444,10 @@ int main(int argc, char *argv[])
     float deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
     processInput(window, deltaTime, &state);
+
+    // SpotLight follows camera
+    glm_vec3_copy(state.camera.position, state.spotLight.position);
+    glm_vec3_copy(state.camera.front, state.spotLight.direction);
 
     vec3 cameraTarget;
     glm_vec3_add(state.camera.position, state.camera.front, cameraTarget);
@@ -430,6 +474,16 @@ int main(int argc, char *argv[])
       glUniform1f(pointLightsLocations[i].linear, state.pointLights[i].linear);
       glUniform1f(pointLightsLocations[i].quadratic, state.pointLights[i].quadratic);
     }
+    glUniform3fv(spotLightLocation.position, 1, state.spotLight.position);
+    glUniform3fv(spotLightLocation.direction, 1, state.spotLight.direction);
+    glUniform3fv(spotLightLocation.ambient, 1, state.spotLight.ambient);
+    glUniform3fv(spotLightLocation.diffuse, 1, state.spotLight.diffuse);
+    glUniform3fv(spotLightLocation.specular, 1, state.spotLight.specular);
+    glUniform1f(spotLightLocation.cutOff, state.spotLight.cutOff);
+    glUniform1f(spotLightLocation.outerCutOff, state.spotLight.outerCutOff);
+    glUniform1f(spotLightLocation.constant, state.spotLight.constant);
+    glUniform1f(spotLightLocation.linear, state.spotLight.linear);
+    glUniform1f(spotLightLocation.quadratic, state.spotLight.quadratic);
 
     glUniform3fv(viewPosLocation, 1, (GLfloat *)(state.camera.position));
 
