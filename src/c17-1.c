@@ -8,6 +8,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#define POINT_LIGHTS_COUNT 4
+
 typedef struct Camera
 {
   vec3 position;
@@ -22,11 +24,40 @@ typedef struct DirLight
   vec3 diffuse;
   vec3 specular;
 } DirLight;
+typedef struct PointLight
+{
+  vec3 position;
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+  float constant;
+  float linear;
+  float quadratic;
+} PointLight;
 typedef struct State
 {
   Camera camera;
   DirLight dirLight;
+  PointLight pointLights[POINT_LIGHTS_COUNT];
 } State;
+
+typedef struct DirLightLocation
+{
+  GLint direction;
+  GLint ambient;
+  GLint diffuse;
+  GLint specular;
+} DirLightLocation;
+typedef struct PointLightLocation
+{
+  GLint position;
+  GLint ambient;
+  GLint diffuse;
+  GLint specular;
+  GLint constant;
+  GLint linear;
+  GLint quadratic;
+} PointLightLocation;
 
 static void ensureNoErrorMessage(const GLchar *prompt, const GLchar *message)
 {
@@ -269,13 +300,6 @@ int main(int argc, char *argv[])
       {1.5f, 0.2f, -1.5f},
       {-1.3f, 1.0f, -1.5f}};
 
-  // positions of the point lights
-  vec3 pointLightPositions[] = {
-      {0.7f, 0.2f, 2.0f},
-      {2.3f, -3.3f, -4.0f},
-      {-4.0f, 2.0f, -12.0f},
-      {0.0f, 0.0f, -3.0f}};
-
   GLuint VBO, VAOs[2];
   glGenBuffers(1, &VBO);
   glGenVertexArrays(2, VAOs);
@@ -310,7 +334,15 @@ int main(int argc, char *argv[])
           .up = {0.0f, 1.0f, 0.0f},
           .fov = 45.0f,
       },
-      .dirLight = {.direction = {-0.2f, -1.0f, -0.3f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.4f, 0.4f, 0.4f}, .specular = {0.5f, 0.5f, 0.5f}}};
+      .dirLight = {.direction = {-0.2f, -1.0f, -0.3f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.4f, 0.4f, 0.4f}, .specular = {0.5f, 0.5f, 0.5f}},
+      .pointLights = {// point light 1
+                      {.position = {0.7f, 0.2f, 2.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
+                      // point light 2
+                      {.position = {2.3f, -3.3f, -4.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
+                      // point light 3
+                      {.position = {-4.0f, 2.0f, -12.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
+                      // point light 4
+                      {.position = {0.0f, 0.0f, -3.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f}}};
   glfwSetWindowUserPointer(window, &state);
 
   glEnable(GL_DEPTH_TEST);
@@ -319,6 +351,7 @@ int main(int argc, char *argv[])
   glfwSetScrollCallback(window, scrollCallback);
 
   mat4 model, view, projection;
+  char uniformNameBuffer[128];
 
   GLuint modelLocations[2] = {
       glGetUniformLocation(lightProgram, "model"),
@@ -334,6 +367,29 @@ int main(int argc, char *argv[])
 
   GLuint transposedInverseModelLocation = glGetUniformLocation(objectProgram, "transposedInverseModel");
   GLuint viewPosLocation = glGetUniformLocation(objectProgram, "viewPos");
+  DirLightLocation dirLightLocation = {
+      .direction = glGetUniformLocation(objectProgram, "dirLight.direction"),
+      .ambient = glGetUniformLocation(objectProgram, "dirLight.ambient"),
+      .diffuse = glGetUniformLocation(objectProgram, "dirLight.diffuse"),
+      .specular = glGetUniformLocation(objectProgram, "dirLight.specular")};
+  PointLightLocation pointLightsLocations[POINT_LIGHTS_COUNT];
+  for (unsigned int i = 0; i < POINT_LIGHTS_COUNT; ++i)
+  {
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].position", i);
+    pointLightsLocations[i].position = glGetUniformLocation(objectProgram, uniformNameBuffer);
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].ambient", i);
+    pointLightsLocations[i].ambient = glGetUniformLocation(objectProgram, uniformNameBuffer);
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].diffuse", i);
+    pointLightsLocations[i].diffuse = glGetUniformLocation(objectProgram, uniformNameBuffer);
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].specular", i);
+    pointLightsLocations[i].specular = glGetUniformLocation(objectProgram, uniformNameBuffer);
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].constant", i);
+    pointLightsLocations[i].constant = glGetUniformLocation(objectProgram, uniformNameBuffer);
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].linear", i);
+    pointLightsLocations[i].linear = glGetUniformLocation(objectProgram, uniformNameBuffer);
+    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].quadratic", i);
+    pointLightsLocations[i].quadratic = glGetUniformLocation(objectProgram, uniformNameBuffer);
+  }
 
   float lastFrame = glfwGetTime();
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
@@ -359,10 +415,22 @@ int main(int argc, char *argv[])
 
     glUniformMatrix4fv(viewLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)view);
     glUniformMatrix4fv(projectionLocations[OBJECT_ID], 1, GL_FALSE, (GLfloat *)projection);
-    glUniform3fv(glGetUniformLocation(objectProgram, "dirLight.direction"), 1, state.dirLight.direction);
-    glUniform3fv(glGetUniformLocation(objectProgram, "dirLight.ambient"), 1, state.dirLight.ambient);
-    glUniform3fv(glGetUniformLocation(objectProgram, "dirLight.diffuse"), 1, state.dirLight.diffuse);
-    glUniform3fv(glGetUniformLocation(objectProgram, "dirLight.specular"), 1, state.dirLight.specular);
+
+    glUniform3fv(dirLightLocation.direction, 1, state.dirLight.direction);
+    glUniform3fv(dirLightLocation.ambient, 1, state.dirLight.ambient);
+    glUniform3fv(dirLightLocation.diffuse, 1, state.dirLight.diffuse);
+    glUniform3fv(dirLightLocation.specular, 1, state.dirLight.specular);
+    for (unsigned int i = 0; i < POINT_LIGHTS_COUNT; ++i)
+    {
+      glUniform3fv(pointLightsLocations[i].position, 1, state.pointLights[i].position);
+      glUniform3fv(pointLightsLocations[i].ambient, 1, state.pointLights[i].ambient);
+      glUniform3fv(pointLightsLocations[i].diffuse, 1, state.pointLights[i].diffuse);
+      glUniform3fv(pointLightsLocations[i].specular, 1, state.pointLights[i].specular);
+      glUniform1f(pointLightsLocations[i].constant, state.pointLights[i].constant);
+      glUniform1f(pointLightsLocations[i].linear, state.pointLights[i].linear);
+      glUniform1f(pointLightsLocations[i].quadratic, state.pointLights[i].quadratic);
+    }
+
     glUniform3fv(viewPosLocation, 1, (GLfloat *)(state.camera.position));
 
     glBindVertexArray(VAOs[OBJECT_ID]);
@@ -386,19 +454,22 @@ int main(int argc, char *argv[])
       glDrawArrays(GL_TRIANGLES, 0, 36);
     }
 
-    // glUseProgram(lightProgram);
-    // glBindVertexArray(VAOs[LIGHT_ID]);
-    // mat4 lightModel;
-    // glm_translate_make(lightModel, state.lightPos);
-    // glm_scale_uni(lightModel, 0.2f);
+    glUseProgram(lightProgram);
+    glUniformMatrix4fv(viewLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)view);
+    glUniformMatrix4fv(projectionLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)projection);
 
-    // glUniformMatrix4fv(modelLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)lightModel);
-    // glUniformMatrix4fv(viewLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)view);
-    // glUniformMatrix4fv(projectionLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)projection);
+    glBindVertexArray(VAOs[LIGHT_ID]);
+    for (unsigned int i = 0; i < POINT_LIGHTS_COUNT; ++i)
+    {
+      mat4 lightModel;
+      glm_translate_make(lightModel, state.pointLights[i].position);
+      glm_scale_uni(lightModel, 0.2f);
+      glUniformMatrix4fv(modelLocations[LIGHT_ID], 1, GL_FALSE, (GLfloat *)lightModel);
 
-    // glUniform3fv(lightColorLocation, 1, lightColor);
+      glUniform3fv(lightColorLocation, 1, state.pointLights[i].diffuse);
 
-    // glDrawArrays(GL_TRIANGLES, 0, 36);
+      glDrawArrays(GL_TRIANGLES, 0, 36);
+    }
 
     /* Swap front and back buffers */
     glfwSwapBuffers(window);

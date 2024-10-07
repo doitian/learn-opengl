@@ -1,5 +1,7 @@
 #version 330 core
 
+#define POINT_LIGHTS_COUNT 4
+
 in vec3 FragPos;
 in vec3 Normal;
 in vec2 TexCoords;
@@ -17,12 +19,20 @@ struct DirLight {
   vec3 diffuse;
   vec3 specular;
 };
+struct PointLight {
+  vec3 position;
+  vec3 ambient;
+  vec3 diffuse;
+  vec3 specular;
+  float constant;
+  float linear;
+  float quadratic;
+};
 
 uniform Material material;
 uniform DirLight dirLight;
+uniform PointLight pointLights[POINT_LIGHTS_COUNT];
 uniform vec3 viewPos;
-
-const int INVERSE_SPECULAR_MAP = 2;
 
 vec3 calcDirLight(DirLight light, vec3 norm, vec3 materialAmbient, vec3 materialSpecular) {
   // ambient
@@ -40,6 +50,17 @@ vec3 calcDirLight(DirLight light, vec3 norm, vec3 materialAmbient, vec3 material
   return ambient + diffuse + specular;
 }
 
+vec3 calcPointLight(PointLight light, vec3 norm, vec3 materialAmbient, vec3 materialSpecular) {
+  float distance = length(light.position - FragPos);
+  float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));
+
+  if (attenuation < 0.00001) {
+    return vec3(0.0);
+  }
+
+  return calcDirLight(DirLight(FragPos - light.position, light.ambient, light.diffuse, light.specular), norm, materialAmbient, materialSpecular) * attenuation;
+}
+
 void main() {
   vec3 norm = normalize(Normal);
   vec3 materialAmbient = vec3(texture(material.diffuse, TexCoords));
@@ -47,6 +68,10 @@ void main() {
 
   vec3 res = vec3(0.0);
   res += calcDirLight(dirLight, norm, materialAmbient, materialSpecular);
+
+  for(int i = 0; i < POINT_LIGHTS_COUNT; i++) {
+    res += calcPointLight(pointLights[i], norm, materialAmbient, materialSpecular);
+  }
 
   FragColor = vec4(res, 1.0);
 }
