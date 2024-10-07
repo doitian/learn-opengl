@@ -19,7 +19,13 @@ typedef struct State
 {
   Camera camera;
   vec3 lightPos;
+  int flags;
 } State;
+
+enum FLAGS
+{
+  INVERSE_SPECULAR_MAP = 1 << 0,
+};
 
 static void ensureNoErrorMessage(const GLchar *prompt, const GLchar *message)
 {
@@ -42,9 +48,15 @@ static unsigned char *ensureStbiSuccess(unsigned char *data)
   exit(-1);
 }
 
-void processInput(GLFWwindow *window, float deltaTime, Camera *camera)
+void processInput(GLFWwindow *window, float deltaTime, State *state)
 {
+  Camera *camera = &(state->camera);
   const float cameraSpeed = 2.5f * deltaTime;
+
+  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+  {
+    state->flags ^= INVERSE_SPECULAR_MAP;
+  }
 
   vec3 translation = {0.0f, 0.0f, 0.0f};
 
@@ -306,8 +318,10 @@ int main(int argc, char *argv[])
   GLuint transposedInverseModelLocation = glGetUniformLocation(objectProgram, "transposedInverseModel");
   GLuint lightPosLocation = glGetUniformLocation(objectProgram, "light.position");
   GLuint viewPosLocation = glGetUniformLocation(objectProgram, "viewPos");
+  GLuint flagsLocation = glGetUniformLocation(objectProgram, "flags");
 
   float lastFrame = glfwGetTime();
+  glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window))
   {
@@ -318,7 +332,7 @@ int main(int argc, char *argv[])
     float currentFrame = glfwGetTime();
     float deltaTime = currentFrame - lastFrame;
     lastFrame = currentFrame;
-    processInput(window, deltaTime, &state.camera);
+    processInput(window, deltaTime, &state);
 
     vec3 lightColor = {sin(lastFrame * 2.0f), sin(lastFrame * 0.7f), sin(lastFrame * 1.3f)};
     vec3 lightSpecular = {1.0f, 1.0f, 1.0f};
@@ -348,6 +362,7 @@ int main(int argc, char *argv[])
     glUniform3fv(glGetUniformLocation(objectProgram, "light.specular"), 1, lightSpecular);
     glUniform3fv(lightPosLocation, 1, (GLfloat *)(state.lightPos));
     glUniform3fv(viewPosLocation, 1, (GLfloat *)(state.camera.position));
+    glUniform1i(flagsLocation, state.flags);
 
     mat4 transposedInverseModel;
     glm_mat4_inv(cubeModel, transposedInverseModel);

@@ -21,10 +21,16 @@ struct Light {
 uniform Material material;
 uniform Light light;
 uniform vec3 viewPos;
+uniform int flags;
+
+const int INVERSE_SPECULAR_MAP = 1;
 
 void main() {
   vec3 materialAmbient = vec3(texture(material.diffuse, TexCoords));
   vec3 materialSpecular = vec3(texture(material.specular, TexCoords));
+  if ((flags & INVERSE_SPECULAR_MAP) != 0) {
+    materialSpecular = vec3(1.0) - materialSpecular;
+  }
 
   // ambient
   vec3 ambient = light.ambient * materialAmbient;
