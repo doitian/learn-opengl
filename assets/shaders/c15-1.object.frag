@@ -23,7 +23,7 @@ uniform Light light;
 uniform vec3 viewPos;
 uniform int flags;
 
-const int INVERSE_SPECULAR_MAP = 1;
+const int INVERSE_SPECULAR_MAP = 2;
 
 void main() {
   vec3 materialAmbient = vec3(texture(material.diffuse, TexCoords));

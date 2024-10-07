@@ -24,7 +24,8 @@ typedef struct State
 
 enum FLAGS
 {
-  INVERSE_SPECULAR_MAP = 1 << 0,
+  CHANGE_LIGHT_COLOR = 1 << 0,
+  INVERSE_SPECULAR_MAP = 1 << 1,
 };
 
 static void ensureNoErrorMessage(const GLchar *prompt, const GLchar *message)
@@ -53,7 +54,11 @@ void processInput(GLFWwindow *window, float deltaTime, State *state)
   Camera *camera = &(state->camera);
   const float cameraSpeed = 2.5f * deltaTime;
 
-  if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+  if (glfwGetKey(window, GLFW_KEY_1) == GLFW_PRESS)
+  {
+    state->flags ^= CHANGE_LIGHT_COLOR;
+  }
+  if (glfwGetKey(window, GLFW_KEY_2) == GLFW_PRESS)
   {
     state->flags ^= INVERSE_SPECULAR_MAP;
   }
@@ -334,10 +339,16 @@ int main(int argc, char *argv[])
     lastFrame = currentFrame;
     processInput(window, deltaTime, &state);
 
-    vec3 lightColor = {sin(lastFrame * 2.0f), sin(lastFrame * 0.7f), sin(lastFrame * 1.3f)};
+    vec3 lightColor = {1.0f, 1.0f, 1.0f};
+    if ((state.flags & CHANGE_LIGHT_COLOR) != 0)
+    {
+      lightColor[0] = sin(lastFrame * 2.0f);
+      lightColor[1] = sin(lastFrame * 0.7f);
+      lightColor[2] = sin(lastFrame * 1.3f);
+    }
     vec3 lightSpecular = {1.0f, 1.0f, 1.0f};
     vec3 lightAmbient, lightDiffuse;
-    glm_vec3_scale(lightColor, 1.0f, lightDiffuse);
+    glm_vec3_scale(lightColor, 0.95f, lightDiffuse);
     glm_vec3_scale(lightDiffuse, 0.5f, lightAmbient);
 
     // Rotate the light
