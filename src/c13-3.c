@@ -239,7 +239,7 @@ int main(int argc, char *argv[])
   glfwSetCursorPosCallback(window, cursorPosCallback);
   glfwSetScrollCallback(window, scrollCallback);
 
-  mat4 model, view, projection;
+  mat4 view, projection;
 
   GLuint modelLocations[2] = {
       glGetUniformLocation(lightProgram, "model"),

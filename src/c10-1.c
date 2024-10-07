@@ -256,7 +256,6 @@ int main(int argc, char *argv[])
 
     for (unsigned int i = 0; i < 10; i++)
     {
-      mat4 model;
       glm_translate_make(model, cubePositions[i]);
       float angle = 20.0f * i;
       glm_rotate(model, glm_rad(angle), (vec3){1.0f, 0.3f, 0.5f});
