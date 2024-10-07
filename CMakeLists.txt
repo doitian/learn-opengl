@@ -202,4 +202,14 @@ add_assets(c17-1
   shaders/c17-1.light.frag
   shaders/c17-1.object.frag
   textures/container2.png
+  textures/container2_specular.png
+)
+
+add_executable(c21-1 src/c21-1.c)
+target_link_libraries(c21-1 glr stb::stb cglm::cglm)
+add_assets(c21-1
+  shaders/c21-1.vert
+  shaders/c21-1.frag
+  textures/container2.png
+  textures/container2_specular.png
 )
