@@ -1,6 +1,9 @@
-#include "glr_internal.h"
+#include "glr.h"
 
-GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *outError)
+const char* UNKNOWN_GLR_SETUP_ERROR = "Unknown GLR Setup Error";
+static GLenum glewError = GLEW_OK;
+
+GLFWwindow *glrSetup(GlrSetupArgs *args)
 {
   static GlrSetupArgs DEFAULT_ARGS = {
       .windowWidth = 640,
@@ -16,8 +19,7 @@ GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *outError)
   /* Initialize the library */
   if (!glfwInit())
   {
-    glrGetGlfwError(outError);
-    return window;
+    return NULL;
   }
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -33,21 +35,33 @@ GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *outError)
   if (!window)
   {
     glfwTerminate();
-    glrGetGlfwError(outError);
-    return window;
+    return NULL;
   }
 
   /* Make the window's context current */
   glfwMakeContextCurrent(window);
 
   /* Init after GL context is available */
-  GLenum err = glewInit();
-  if (GLEW_OK != err)
+  glewError = glewInit();
+  if (GLEW_OK != glewError)
   {
-    glrSetGlError(outError, err);
     glfwTerminate();
-    window = NULL;
+    return NULL;
   }
 
   return window;
+}
+
+const char* glrSetupError() {
+  const char* err = NULL;
+  if (GLFW_NO_ERROR != glfwGetError(&err) && err != NULL) {
+    return err;
+  }
+  if (GLEW_OK != glewError) {
+    GLenum err = glewError;
+    glewError = GLEW_OK;
+    return glewGetErrorString(err);
+  }
+
+  return UNKNOWN_GLR_SETUP_ERROR;
 }

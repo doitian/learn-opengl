@@ -28,12 +28,11 @@ static unsigned char *ensureStbiSuccess(unsigned char *data)
 int main(int argc, char *argv[])
 {
   GlrSetupArgs setup = {.windowWidth = 640, .windowHeight = 480, .windowTitle = argv[0]};
-  GlrError error;
-  GLFWwindow *window = glrSetup(&setup, &error);
+  GLFWwindow *window = glrSetup(&setup);
 
   if (!window)
   {
-    fprintf(stderr, "Error: %s\n", error.message);
+    fprintf(stderr, "Error: %s\n", glrSetupError());
     return -1;
   }
 

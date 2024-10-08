@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-const char *glrReadFile(const char *filename, const char *mode, long *outLen)
+char *glrReadFile(const char *filename, const char *mode, long *outLen)
 {
   char *buffer = NULL;
   long len = -1;

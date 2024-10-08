@@ -4,16 +4,6 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-typedef struct GlrError
-{
-  // OpenGL error or `GL_NO_ERROR`
-  GLenum glError;
-  // GLFW error or `GLFW_NO_ERROR`
-  int glfwError;
-  // Error message
-  const GLubyte *message;
-} GlrError;
-
 typedef struct GlrSetupArgs
 {
   int windowWidth;
@@ -26,10 +16,14 @@ typedef struct GlrShader GlrShader;
 /**
  * @brief Setup the OpenGL context and returns the window.
  * @param args The output param to receive the error on failure.
- * @param outError The output param to receive the error on failure.
  * @return The window on success or NULL on failure.
  */
-GLFWwindow *glrSetup(GlrSetupArgs *args, GlrError *outError);
+GLFWwindow *glrSetup(GlrSetupArgs *args);
+
+/**
+ * @brief Get the error message from the last setup error.
+ */
+const char* glrSetupError();
 
 /**
  * @brief Teardown the window and the OpenGL context.
@@ -48,7 +42,7 @@ void glrTeardown(GLFWwindow *window);
  * @param outLen Output param to get the file size.
  * @return The file content plus an extra `\0` byte or NULL on failure.
  */
-const char *glrReadFile(const char *filename, const char *mode, long *outLen);
+char *glrReadFile(const char *filename, const char *mode, long *outLen);
 
 /**
  * @brief Load a shader by compiling the source code.
@@ -57,13 +51,13 @@ const char *glrReadFile(const char *filename, const char *mode, long *outLen);
  * @param length The length of the source code.
  * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-const GLchar* glrShaderSource(GLuint shader, const GLchar *string, GLsizei length);
+const GLchar *glrShaderSource(GLuint shader, const GLchar *string, GLsizei length);
 
 /**
  * @brief Load a shader by compiling the source code from the file.
  * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-const GLchar* glrShaderSourceFromFile(GLuint shader, const char *filename);
+const GLchar *glrShaderSourceFromFile(GLuint shader, const char *filename);
 
 /**
  * @brief Load a shader from the pre-compiled binary.
@@ -72,13 +66,13 @@ const GLchar* glrShaderSourceFromFile(GLuint shader, const char *filename);
  *
  * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-const GLchar* glrShaderBinary(GLuint shader, GLenum binaryFormat, const void *binary, GLsizei length, const GLchar *entryPoint);
+const GLchar *glrShaderBinary(GLuint shader, GLenum binaryFormat, const void *binary, GLsizei length, const GLchar *entryPoint);
 
 /**
  * @brief Load a shader from the pre-compiled binary file.
  * @return The error message or NULL if no error. The caller is responsible for freeing the memory.
  */
-const GLchar* glrShaderBinaryFromFile(GLuint shader, GLenum binaryFormat, const char *filename, const GLchar *entryPoint);
+const GLchar *glrShaderBinaryFromFile(GLuint shader, GLenum binaryFormat, const char *filename, const GLchar *entryPoint);
 
 /**
  * @brief Link the program.
