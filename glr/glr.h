@@ -11,8 +11,6 @@ typedef struct GlrSetupArgs
   const char *windowTitle;
 } GlrSetupArgs;
 
-typedef struct GlrShader GlrShader;
-
 /**
  * @brief Setup the OpenGL context and returns the window.
  * @param args The output param to receive the error on failure.
