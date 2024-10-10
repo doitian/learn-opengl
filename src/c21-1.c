@@ -85,12 +85,6 @@ typedef struct SpotLightUniforms
   GLint cutOff;
   GLint outerCutOff;
 } SpotLightUniforms;
-typedef struct MaterialUniforms
-{
-  GLint diffuse;
-  GLint specular;
-  GLint shininess;
-} MaterialUniforms;
 typedef struct Uniforms
 {
   GLint model;
@@ -98,7 +92,7 @@ typedef struct Uniforms
   GLint projection;
   GLint transposedInverseModel;
   GLint viewPos;
-  MaterialUniforms material;
+  GlrModelMaterialUniforms material;
   DirLightUniforms dirLight;
   PointLightUniforms pointLights[POINT_LIGHTS_COUNT];
   SpotLightUniforms spotLight;
@@ -224,13 +218,12 @@ GLenum chooseTextureFormat(int nrChannels)
   return GL_RGB;
 }
 
-void loadTexture(GLuint id, GLenum index, const char *path)
+void loadTexture(GLuint id, const char *path)
 {
   int width, height, nrChannels;
   unsigned char *data = ensureStbiSuccess(stbi_load(path, &width, &height, &nrChannels, 0));
 
   GLenum format = chooseTextureFormat(nrChannels);
-  glActiveTexture(index);
   glBindTexture(GL_TEXTURE_2D, id);
   glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
   glGenerateMipmap(GL_TEXTURE_2D);
@@ -255,7 +248,7 @@ int main(int argc, char *argv[])
           .up = {0.0f, 1.0f, 0.0f},
           .fov = 45.0f,
       },
-      .dirLight = {.direction = {-0.2f, -1.0f, -0.3f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.4f, 0.4f, 0.4f}, .specular = {0.5f, 0.5f, 0.5f}},
+      .dirLight = {.direction = {-0.2f, -1.0f, -0.3f}, .ambient = {0.2f, 0.2f, 0.2f}, .diffuse = {0.9f, 0.9f, 0.9f}, .specular = {0.5f, 0.5f, 0.5f}},
       .pointLights = {// point light 1
                       {.position = {0.7f, 0.2f, 2.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
                       // point light 2
@@ -265,50 +258,6 @@ int main(int argc, char *argv[])
                       // point light 4
                       {.position = {0.0f, 0.0f, -3.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f}},
       .spotLight = {.position = {-0.1f, 0.0f, 5.0f}, .direction = {0.0f, 0.0f, -1.0f}, .ambient = {0.0f, 0.0f, 0.0f}, .diffuse = {1.0f, 1.0f, 1.0f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f, .cutOff = cos(glm_rad(12.5f)), .outerCutOff = cos(glm_rad(17.5f))}};
-
-  float vertices[] = {
-      // positions(3f)     // normals(3f)     // texture coords(2f)
-      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-      0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-      0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-      0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-      -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-
-      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-      0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-      0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-      0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-      -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-      -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-      -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-      -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-      0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-      0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-      0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-      0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-      -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-      0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-      0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-      0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-      -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-      -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-
-      -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-      0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-      0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-      0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-      -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-      -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f};
 
   glfwSetWindowUserPointer(window, &state);
 
@@ -362,41 +311,15 @@ int main(int argc, char *argv[])
     uniforms.pointLights[i].quadratic = glGetUniformLocation(program, uniformNameBuffer);
   }
 
-  GLuint textures[2];
-  const int DIFFUSE_TEX = 0, SPECULAR_TEX = 1;
-  glGenTextures(sizeof(textures) / sizeof(GLuint), textures);
-  stbi_set_flip_vertically_on_load(1);
-  loadTexture(textures[DIFFUSE_TEX], GL_TEXTURE0, "textures/container2.png");
-  loadTexture(textures[SPECULAR_TEX], GL_TEXTURE1, "textures/container2_specular.png");
+  GlrModel *backpack = glrLoadModel("objects/backpack/backpack.obj", loadTexture);
+  if (backpack == NULL)
+  {
+    fprintf(stderr, "Failed to load model backpack\n");
+    return -1;
+  }
+  glrBindModel(backpack);
 
-  glUseProgram(program);
-  glUniform1i(glGetUniformLocation(program, "material.diffuse"), 0);
-  glUniform1i(glGetUniformLocation(program, "material.specular"), 1);
-  glUniform1f(glGetUniformLocation(program, "material.shininess"), 64.0f);
-
-  GLuint VBO, VAO;
-  glGenBuffers(1, &VBO);
-  glGenVertexArrays(1, &VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindVertexArray(VAO);
-  // positions
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-  // normals
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(sizeof(float) * 3));
-  glEnableVertexAttribArray(1);
-  // texCoords
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *)(sizeof(float) * 6));
-  glEnableVertexAttribArray(2);
-
-  // unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-  glBindVertexArray(0);
-
-  mat4 model, view, projection;
+  mat4 view, projection;
   float lastFrame = glfwGetTime();
   /* Loop until the user closes the window */
   while (!glfwWindowShouldClose(window))
@@ -452,20 +375,16 @@ int main(int argc, char *argv[])
 
     glUniform3fv(uniforms.viewPos, 1, (GLfloat *)(state.camera.position));
 
-    glBindVertexArray(VAO);
-    mat4 cubeModel;
-    glm_mat4_identity(cubeModel);
-    glm_rotate(cubeModel, glm_rad(20.0f), (vec3){1.0f, 0.3f, 0.5f});
-
-    glUniformMatrix4fv(uniforms.model, 1, GL_FALSE, (GLfloat *)cubeModel);
-    mat4 transposedInverseModel;
-    glm_mat4_inv(cubeModel, transposedInverseModel);
-    glm_mat4_transpose(transposedInverseModel);
+    mat4 model, transposedInverseModel;
     mat3 transposedInverseModelMat3;
+    glm_scale_make(model, (vec3){0.7f, 0.7f, 0.7f});
+    glUniformMatrix4fv(uniforms.model, 1, GL_FALSE, (GLfloat *)model);
+    glm_mat4_inv(model, transposedInverseModel);
+    glm_mat4_transpose(transposedInverseModel);
     glm_mat4_pick3(transposedInverseModel, transposedInverseModelMat3);
     glUniformMatrix3fv(uniforms.transposedInverseModel, 1, GL_FALSE, (GLfloat *)transposedInverseModelMat3);
 
-    glDrawArrays(GL_TRIANGLES, 0, 36);
+    glrDrawModel(backpack, &uniforms.material);
 
     /* Swap front and back buffers */
     glfwSwapBuffers(window);

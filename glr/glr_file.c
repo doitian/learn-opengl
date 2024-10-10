@@ -1,7 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-char *glrReadFile(const char *filename, const char *mode, long *outLen)
+#include "glr.h"
+
+char *glrReadFile(const char *filename, const char *mode, GLsizei *outLen)
 {
   char *buffer = NULL;
   long len = -1;
@@ -33,7 +35,7 @@ char *glrReadFile(const char *filename, const char *mode, long *outLen)
 
   if (outLen != NULL)
   {
-    *outLen = len;
+    *outLen = (GLsizei)len;
   }
   return buffer;
 }

@@ -26,19 +26,19 @@ uniform int flags;
 const int INVERSE_SPECULAR_MAP = 2;
 
 void main() {
-  vec3 materialAmbient = vec3(texture(material.diffuse, TexCoords));
+  vec3 materialDiffuse = vec3(texture(material.diffuse, TexCoords));
   vec3 materialSpecular = vec3(texture(material.specular, TexCoords));
   if ((flags & INVERSE_SPECULAR_MAP) != 0) {
     materialSpecular = vec3(1.0) - materialSpecular;
   }
 
   // ambient
-  vec3 ambient = light.ambient * materialAmbient;
+  vec3 ambient = light.ambient * materialDiffuse;
 
   // diffuse
   vec3 norm = normalize(Normal);
   vec3 lightDir = normalize(light.position - FragPos);
-  vec3 diffuse = max(dot(norm, lightDir), 0.0) * light.diffuse * materialAmbient;
+  vec3 diffuse = max(dot(norm, lightDir), 0.0) * light.diffuse * materialDiffuse;
 
   // specular
   vec3 viewDir = normalize(viewPos - FragPos);

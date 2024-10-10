@@ -11,6 +11,7 @@ add_library(glr
   glr/glr_teardown.c
   glr/glr_file.c
   glr/glr_shader.c
+  glr/glr_model.c
 )
 
 target_include_directories(glr PUBLIC glr)
@@ -210,6 +211,8 @@ target_link_libraries(c21-1 glr stb::stb cglm::cglm)
 add_assets(c21-1
   shaders/c21-1.vert
   shaders/c21-1.frag
-  textures/container2.png
-  textures/container2_specular.png
+  objects/backpack/backpack.obj
+  objects/backpack/backpack.mtl
+  objects/backpack/diffuse.jpg
+  objects/backpack/specular.jpg
 )

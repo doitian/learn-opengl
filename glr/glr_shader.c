@@ -38,7 +38,8 @@ static const GLchar* strerrorDup()
 
 const GLchar* glrShaderSource(GLuint shader, const GLchar *string, GLsizei length)
 {
-  glShaderSource(shader, 1, &string, &length);
+  GLint lengthInt = (GLint)length;
+  glShaderSource(shader, 1, &string, &lengthInt);
   glCompileShader(shader);
 
   return glrGetShaderError(shader);
@@ -46,7 +47,7 @@ const GLchar* glrShaderSource(GLuint shader, const GLchar *string, GLsizei lengt
 
 const GLchar* glrShaderSourceFromFile(GLuint shader, const char *filename)
 {
-  long len = 0;
+  GLsizei len = 0;
   const char *buffer = glrReadFile(filename, "r", &len);
   if (buffer == NULL)
   {
@@ -65,7 +66,7 @@ const GLchar* glrShaderBinary(GLuint shader, GLenum binaryFormat, const void *bi
 
 const GLchar* glrShaderBinaryFromFile(GLuint shader, GLenum binaryFormat, const char *filename, const GLchar *entryPoint)
 {
-  long len = 0;
+  GLsizei len = 0;
   const char *buffer = glrReadFile(filename, "rb", &len);
   if (buffer == NULL)
   {
