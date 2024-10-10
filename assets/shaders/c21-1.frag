@@ -1,6 +1,5 @@
 #version 330 core
 
-#define POINT_LIGHTS_COUNT 4
 #define NEARLY_ZERO 0.00001
 
 in vec3 FragPos;
@@ -44,7 +43,6 @@ struct SpotLight {
 
 uniform Material material;
 uniform DirLight dirLight;
-uniform PointLight pointLights[POINT_LIGHTS_COUNT];
 uniform SpotLight spotLight;
 uniform vec3 viewPos;
 
@@ -98,9 +96,6 @@ void main() {
 
   vec3 res = vec3(0.0);
   res += calcDirLight(dirLight, norm, materialDiffuse, materialSpecular);
-  for(int i = 0; i < POINT_LIGHTS_COUNT; i++) {
-    res += calcPointLight(pointLights[i], norm, materialDiffuse, materialSpecular);
-  }
   res += calcSpotLight(spotLight, norm, materialDiffuse, materialSpecular);
 
   FragColor = vec4(res, 1.0);

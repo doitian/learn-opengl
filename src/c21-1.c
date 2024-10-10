@@ -8,8 +8,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-#define POINT_LIGHTS_COUNT 4
-
 typedef struct Camera
 {
   vec3 position;
@@ -24,16 +22,6 @@ typedef struct DirLight
   vec3 diffuse;
   vec3 specular;
 } DirLight;
-typedef struct PointLight
-{
-  vec3 position;
-  vec3 ambient;
-  vec3 diffuse;
-  vec3 specular;
-  float constant;
-  float linear;
-  float quadratic;
-} PointLight;
 typedef struct SpotLight
 {
   vec3 position;
@@ -51,7 +39,6 @@ typedef struct State
 {
   Camera camera;
   DirLight dirLight;
-  PointLight pointLights[POINT_LIGHTS_COUNT];
   SpotLight spotLight;
 } State;
 
@@ -62,16 +49,6 @@ typedef struct DirLightUniforms
   GLint diffuse;
   GLint specular;
 } DirLightUniforms;
-typedef struct PointLightUniforms
-{
-  GLint position;
-  GLint ambient;
-  GLint diffuse;
-  GLint specular;
-  GLint constant;
-  GLint linear;
-  GLint quadratic;
-} PointLightUniforms;
 typedef struct SpotLightUniforms
 {
   GLint position;
@@ -94,7 +71,6 @@ typedef struct Uniforms
   GLint viewPos;
   GlrModelMaterialUniforms material;
   DirLightUniforms dirLight;
-  PointLightUniforms pointLights[POINT_LIGHTS_COUNT];
   SpotLightUniforms spotLight;
 } Uniforms;
 
@@ -248,16 +224,8 @@ int main(int argc, char *argv[])
           .up = {0.0f, 1.0f, 0.0f},
           .fov = 45.0f,
       },
-      .dirLight = {.direction = {-0.2f, -1.0f, -0.3f}, .ambient = {0.2f, 0.2f, 0.2f}, .diffuse = {0.9f, 0.9f, 0.9f}, .specular = {0.5f, 0.5f, 0.5f}},
-      .pointLights = {// point light 1
-                      {.position = {0.7f, 0.2f, 2.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
-                      // point light 2
-                      {.position = {2.3f, -3.3f, -4.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
-                      // point light 3
-                      {.position = {-4.0f, 2.0f, -12.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f},
-                      // point light 4
-                      {.position = {0.0f, 0.0f, -3.0f}, .ambient = {0.05f, 0.05f, 0.05f}, .diffuse = {0.8f, 0.8f, 0.8f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f}},
-      .spotLight = {.position = {-0.1f, 0.0f, 5.0f}, .direction = {0.0f, 0.0f, -1.0f}, .ambient = {0.0f, 0.0f, 0.0f}, .diffuse = {1.0f, 1.0f, 1.0f}, .specular = {1.0f, 1.0f, 1.0f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f, .cutOff = cos(glm_rad(12.5f)), .outerCutOff = cos(glm_rad(17.5f))}};
+      .dirLight = {.direction = {-0.2f, -1.0f, -0.3f}, .ambient = {0.5f, 0.5f, 0.5f}, .diffuse = {0.9f, 0.9f, 0.9f}, .specular = {0.5f, 0.5f, 0.5f}},
+      .spotLight = {.position = {-0.1f, 0.0f, 5.0f}, .direction = {0.0f, 0.0f, -1.0f}, .ambient = {0.0f, 0.0f, 0.0f}, .diffuse = {0.3f, 0.3f, 0.3f}, .specular = {0.5f, 0.5f, 0.5f}, .constant = 1.0f, .linear = 0.09f, .quadratic = 0.032f, .cutOff = cos(glm_rad(15.0f)), .outerCutOff = cos(glm_rad(22.5f))}};
 
   glfwSetWindowUserPointer(window, &state);
 
@@ -293,23 +261,6 @@ int main(int argc, char *argv[])
           .shininess = glGetUniformLocation(program, "material.shininess")},
       .dirLight = {.direction = glGetUniformLocation(program, "dirLight.direction"), .ambient = glGetUniformLocation(program, "dirLight.ambient"), .diffuse = glGetUniformLocation(program, "dirLight.diffuse"), .specular = glGetUniformLocation(program, "dirLight.specular")},
       .spotLight = {.position = glGetUniformLocation(program, "spotLight.position"), .direction = glGetUniformLocation(program, "spotLight.direction"), .ambient = glGetUniformLocation(program, "spotLight.ambient"), .diffuse = glGetUniformLocation(program, "spotLight.diffuse"), .specular = glGetUniformLocation(program, "spotLight.specular"), .constant = glGetUniformLocation(program, "spotLight.constant"), .linear = glGetUniformLocation(program, "spotLight.linear"), .quadratic = glGetUniformLocation(program, "spotLight.quadratic"), .cutOff = glGetUniformLocation(program, "spotLight.cutOff"), .outerCutOff = glGetUniformLocation(program, "spotLight.outerCutOff")}};
-  for (unsigned int i = 0; i < POINT_LIGHTS_COUNT; ++i)
-  {
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].position", i);
-    uniforms.pointLights[i].position = glGetUniformLocation(program, uniformNameBuffer);
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].ambient", i);
-    uniforms.pointLights[i].ambient = glGetUniformLocation(program, uniformNameBuffer);
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].diffuse", i);
-    uniforms.pointLights[i].diffuse = glGetUniformLocation(program, uniformNameBuffer);
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].specular", i);
-    uniforms.pointLights[i].specular = glGetUniformLocation(program, uniformNameBuffer);
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].constant", i);
-    uniforms.pointLights[i].constant = glGetUniformLocation(program, uniformNameBuffer);
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].linear", i);
-    uniforms.pointLights[i].linear = glGetUniformLocation(program, uniformNameBuffer);
-    snprintf(uniformNameBuffer, sizeof(uniformNameBuffer), "pointLights[%d].quadratic", i);
-    uniforms.pointLights[i].quadratic = glGetUniformLocation(program, uniformNameBuffer);
-  }
 
   GlrModel *backpack = glrLoadModel("objects/backpack/backpack.obj", loadTexture);
   if (backpack == NULL)
@@ -352,16 +303,6 @@ int main(int argc, char *argv[])
     glUniform3fv(uniforms.dirLight.ambient, 1, state.dirLight.ambient);
     glUniform3fv(uniforms.dirLight.diffuse, 1, state.dirLight.diffuse);
     glUniform3fv(uniforms.dirLight.specular, 1, state.dirLight.specular);
-    for (unsigned int i = 0; i < POINT_LIGHTS_COUNT; ++i)
-    {
-      glUniform3fv(uniforms.pointLights[i].position, 1, state.pointLights[i].position);
-      glUniform3fv(uniforms.pointLights[i].ambient, 1, state.pointLights[i].ambient);
-      glUniform3fv(uniforms.pointLights[i].diffuse, 1, state.pointLights[i].diffuse);
-      glUniform3fv(uniforms.pointLights[i].specular, 1, state.pointLights[i].specular);
-      glUniform1f(uniforms.pointLights[i].constant, state.pointLights[i].constant);
-      glUniform1f(uniforms.pointLights[i].linear, state.pointLights[i].linear);
-      glUniform1f(uniforms.pointLights[i].quadratic, state.pointLights[i].quadratic);
-    }
     glUniform3fv(uniforms.spotLight.position, 1, state.spotLight.position);
     glUniform3fv(uniforms.spotLight.direction, 1, state.spotLight.direction);
     glUniform3fv(uniforms.spotLight.ambient, 1, state.spotLight.ambient);
