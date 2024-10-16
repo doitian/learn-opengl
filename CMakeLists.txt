@@ -216,3 +216,13 @@ add_assets(c21-1
   objects/backpack/diffuse.jpg
   objects/backpack/specular.jpg
 )
+
+add_executable(c23-1 src/c23-1.c)
+target_link_libraries(c23-1 glr stb::stb cglm::cglm)
+add_assets(c23-1
+  shaders/c23-1.vert
+  shaders/c23-1.object.frag
+  shaders/c23-1.border.frag
+  textures/container2.png
+  textures/container2_specular.png
+)
