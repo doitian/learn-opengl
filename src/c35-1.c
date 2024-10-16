@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <glr.h>
 #include <cglm/mat4.h>
 #include <cglm/affine.h>
@@ -251,6 +252,38 @@ void renderScene(Uniforms *uniforms, GLfloat *view, GLfloat *projection)
   renderCube();
 }
 
+void renderQuad()
+{
+  static float vertices[] = {
+      // positions       // texture Coords
+      -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
+      -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+      1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+      1.0f, -1.0f, 0.0f, 1.0f, 0.0f};
+  static GLuint vao = 0, vbo = 0;
+
+  if (vao == 0)
+  {
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+  }
+
+  glBindVertexArray(vao);
+  glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  glBindVertexArray(0);
+}
+
 int main(int argc, char *argv[])
 {
   GlrSetupArgs setup = {.windowWidth = 1600, .windowHeight = 1200, .windowTitle = argv[0]};
@@ -277,7 +310,8 @@ int main(int argc, char *argv[])
   glfwSetCursorPosCallback(window, cursorPosCallback);
   glfwSetScrollCallback(window, scrollCallback);
 
-  // glEnable(GL_DEPTH_TEST);
+  glEnable(GL_DEPTH_TEST);
+  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   GLuint depthProgram = glCreateProgram();
   {
@@ -299,6 +333,39 @@ int main(int argc, char *argv[])
       .projection = glGetUniformLocation(depthProgram, "projection"),
   };
 
+  GLuint quadProgram = glCreateProgram();
+  {
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    ensureNoErrorMessage("Compiling Vertex Shader", glrShaderSourceFromFile(vertexShader, "shaders/c35-1.quad.vert"));
+    glAttachShader(quadProgram, vertexShader);
+
+    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    ensureNoErrorMessage("Compiling Frag Shader", glrShaderSourceFromFile(fragShader, "shaders/c35-1.depth-quad.frag"));
+    glAttachShader(quadProgram, fragShader);
+
+    ensureNoErrorMessage("Linking Program", glrLinkProgram(quadProgram));
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragShader);
+  }
+  // use GL_TEXTURE0 for depthMap
+  glUniform1i(glGetUniformLocation(quadProgram, "depthMap"), 0);
+
+  const int MAP_LENGTH = max(setup.windowHeight, setup.windowHeight);
+  GLuint depthMapFBO, depthMap;
+  glGenFramebuffers(1, &depthMapFBO);
+  glGenTextures(1, &depthMap);
+  glBindTexture(GL_TEXTURE_2D, depthMap);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, MAP_LENGTH, MAP_LENGTH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+  glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthMap, 0);
+  glDrawBuffer(GL_NONE);
+  glReadBuffer(GL_NONE);
+  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
   mat4 view, projection;
   float lastFrame = glfwGetTime();
   /* Loop until the user closes the window */
@@ -313,13 +380,24 @@ int main(int argc, char *argv[])
     lastFrame = currentFrame;
     processInput(window, deltaTime, &state);
 
-    vec3 cameraTarget;
-    glm_vec3_add(state.camera.position, state.camera.front, cameraTarget);
-    glm_lookat(state.camera.position, cameraTarget, state.camera.up, view);
-    glm_perspective(glm_rad(state.camera.fov), (float)(setup.windowWidth) / setup.windowHeight, 0.1f, 100.0f, projection);
+    vec3 lightPos = {-2.0f, 4.0f, -1.0f};
+    float nearPlane = 1.0f, farPlane = 7.5f;
+    glm_lookat(lightPos, GLM_VEC3_ZERO, (vec3){-0.0f, 1.0f, 0.0f}, view);
+    glm_ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane, projection);
 
+    glBindFramebuffer(GL_FRAMEBUFFER, depthMapFBO);
+    glViewport(0, 0, MAP_LENGTH, MAP_LENGTH);
+    glClear(GL_DEPTH_BUFFER_BIT);
     glUseProgram(depthProgram);
     renderScene(&uniforms, (GLfloat *)view, (GLfloat *)projection);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glViewport(0, 0, setup.windowWidth, setup.windowHeight);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glUseProgram(quadProgram);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, depthMap);
+    renderQuad();
 
     /* Swap front and back buffers */
     glfwSwapBuffers(window);

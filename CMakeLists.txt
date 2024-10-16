@@ -232,4 +232,6 @@ target_link_libraries(c35-1 glr cglm::cglm)
 add_assets(c35-1
   shaders/c35-1.depth.vert
   shaders/c35-1.depth.frag
+  shaders/c35-1.quad.vert
+  shaders/c35-1.depth-quad.frag
 )
