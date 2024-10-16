@@ -226,3 +226,10 @@ add_assets(c23-1
   textures/container2.png
   textures/container2_specular.png
 )
+
+add_executable(c35-1 src/c35-1.c)
+target_link_libraries(c35-1 glr cglm::cglm)
+add_assets(c35-1
+  shaders/c35-1.depth.vert
+  shaders/c35-1.depth.frag
+)
